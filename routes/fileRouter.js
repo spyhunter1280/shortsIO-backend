@@ -6,5 +6,6 @@ const checkAuthorization = require('../middleware');
 const Upload =  require('../middleware/upload');
 
 router.get('/uploadYoutube', FileController.uploadYoutube);
+router.get('/getCaption', FileController.generateSRT);
 
 module.exports = router;

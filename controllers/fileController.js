@@ -114,3 +114,4 @@ exports.uploadYoutube = async (req, res) => {
 exports.generateSRT = async (req, res) => {
     submitTranscription().catch((err) => console.error('Error:', err));
 }
+
