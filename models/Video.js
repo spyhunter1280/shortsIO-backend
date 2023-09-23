@@ -1,45 +1,25 @@
 const mongoose = require('mongoose');
 
-const UserSchema = new mongoose.Schema({
-  firstName: {
+const VideoSchema = new mongoose.Schema({
+  userID: {
     type: String,
-    trim: true
+    trim: true,
   },
-  lastName: {
+  originURL: {
     type: String,
-    trim: true
   },
-  userName: {
+  modifiedURL: {
     type: String,
-    unique: true,
-    trim: true
   },
-  email: {
+  originCaption: {
     type: String,
-    unique: true,
-    required:true,
-    lowercase: true,
-    trim: true
   },
-  password: {
+  modifiedCaption: {
     type: String,
-    trim: true
   },
-  otp: {
-    type: String,
-    trim: true
-  },
-  verify: {
-    type: Boolean,
-    default: false
-  },
-  avatar: {
-    type:String,
-    default:'Qmdtg2avcq2z2WZ1RrSJAXJZbMkG8u9MVcedSNCAwsK4u5'
-  },
-  country: String
+  
 });
 
-const User = mongoose.model('User', UserSchema);
+const Video = mongoose.model('Video', VideoSchema);
 
-module.exports = User;
+module.exports = Video;
