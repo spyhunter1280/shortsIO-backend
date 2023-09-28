@@ -5,6 +5,8 @@ const axios = require('axios');
 const path = require('path');
 const FormData = require('form-data');
 const Video = require('../models/Video');
+const videoTrim = require('../utils');
+const videoCrop = require('../utils');
 dotenv.config();
 // HTTP request headers
 const headers = {
@@ -39,6 +41,7 @@ async function exportSubtitles(api_token, transcriptId, format, fileName) {
     //     );
     // });
 }
+
 // Polling for transcription completion
 async function pollTranscription(pollingEndpoint, fileName) {
     while (true) {
@@ -135,15 +138,60 @@ exports.generateSRT = async (req, res) => {
         // Start polling for transcription completion
         const pollingEndpoint = `https://api.assemblyai.com/v2/transcript/${response.data.id}`;
         console.log(pollingEndpoint)
-        const result = await pollTranscription(pollingEndpoint, fileName);
+        const allcaptions = await pollTranscription(pollingEndpoint, fileName);
+        //get timeframe and subcaptions(emojis)
+        //
         const video = new Video({
             originURL: fileURL,
-            originCaption: result,
+            originCaption: allcaptions,
+            // modifiedURL: newfileURL,
+            // modifiedCaption: newCaption
         });
         await video.save();
-        res.status(200).send({ message: result });
+        console.log(video);
+        res.status(200).send({ message: video });
     } catch (error) {
         res.status(403).send({ message: 'error' });
         console.log(error);
     }
+}
+
+exports.cropVideo = async (req, res) => {
+    const { videoID, width, height, x, y } = req.headers;
+    const video = await Video.findById(videoID);
+    await videoCrop(video.modifiedURL, width, height, x, y, output);
+    formDataUpload({
+        accountId: process.env.accountId,
+        apiKey: process.env.apiKey,
+        filePath: `uploads/${output}.mp4`,
+        originalFileName: `${output}.mp4`,
+    }).then(
+        response => {
+            console.log(`Success: ${JSON.stringify(response)}`);
+            const fileURL = response['files'][0]['fileUrl'];
+            video.modifiedURL = fileURL;
+            video.save();
+            res.status(200).json({ message: 'success', data: video });
+        },
+        error => console.error(error)
+    );
+}
+
+exports.trimVideo = async (req, res) => {
+    const { starttime, endtime, fileURL, output } = req.headers.fileid;
+    await videoCrop(fileURL, starttime, endtime, output);
+    formDataUpload({
+        accountId: process.env.accountId,
+        apiKey: process.env.apiKey,
+        filePath: `uploads/${output}.mp4`,
+        originalFileName: `${output}.mp4`,
+    }).then(
+        response => {
+            console.log(`Success: ${JSON.stringify(response)}`);
+            const fileURL = response['files'][0]['fileUrl'];
+            console.log('url', fileURL)
+            res.status(200).json({ message: 'success', fileURL: fileURL });
+        },
+        error => console.error(error)
+    );
 }

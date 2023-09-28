@@ -7,5 +7,6 @@ const Upload =  require('../middleware/upload');
 
 router.get('/uploadYoutube', FileController.uploadYoutube);
 router.get('/getCaption', FileController.generateSRT);
+router.get('/cropVideo', FileController.cropVideo);
 
 module.exports = router;
