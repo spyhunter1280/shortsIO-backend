@@ -49,24 +49,26 @@ exports.generateImpressiveTimeframe = async (input) => {
 };
 
 exports.videoTrim = async ({ inputUrl, startTime, endTime, outputFile }) => {
+    console.log(inputUrl, startTime, endTime, outputFile)
     return new Promise((resolve, reject) => {
         ffmpeg(inputUrl)
             .setStartTime(startTime)
             .setDuration(endTime - startTime)
-            .output(`uploads/${outputFile}`)
+            .output(`home/ubuntu/shortsIO-backend/uploads/${outputFile}`)
             .on('end', () => resolve())
             .on('error', (err) => reject(err))
             .run();
     });
 }
 
-exports.videoCrop = async ({ inputUrl, width, height, x, y, outputFilePath }) => {
+exports.videoCrop = async ({ inputUrl, width, height, x, y, outputFile }) => {
+    console.log(inputUrl, width, height, x, y, outputFile)
     return new Promise((resolve, reject) => {
         ffmpeg(inputUrl)
             .outputOptions(
                 '-vf', `crop=${width}:${height}:${x}:${y}`
             )
-            .output(outputFilePath)
+            .output(`home/ubuntu/shortsIO-backend/uploads/${outputFile}`)
             .on('end', () => resolve())
             .on('error', (err) => reject(err))
             .run();

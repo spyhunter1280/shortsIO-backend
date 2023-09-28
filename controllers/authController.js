@@ -12,7 +12,7 @@ exports.display = async (req, res) => {
     const rootpath = path.resolve(__dirname, '..');
     const filePath = path.resolve(
         rootpath,
-        `uploads/${req.params.filename}`
+        `home/ubuntu/shortsIO-backend/uploads/${req.params.filename}`
     );
     res.sendFile(filePath);
 }
