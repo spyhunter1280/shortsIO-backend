@@ -17,6 +17,9 @@ const VideoSchema = new mongoose.Schema({
   modifiedCaption: {
     type: String,
   },
+  duration: Number,
+  originwidth: Number,
+  originheight: Number,
   start_time: Number,
   end_time: Number,
   x: Number,

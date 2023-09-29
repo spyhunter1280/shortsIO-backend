@@ -97,13 +97,13 @@ exports.uploadYoutube = async (req, res) => {
         // console.log('videoFormat: ', videoFormat)
         console.log('videotitle', videoTitle)
         ytdl(youtubeVideoUrl, { format: videoFormat })
-            .pipe(fs.createWriteStream(`home/ubuntu/shortsIO-backend/uploads/${videoTitle}.mp4`))
+            .pipe(fs.createWriteStream(`uploads/${videoTitle}.mp4`))
             .on('finish', () => {
                 // res.send(`${videoTitle}.mp4`);
                 formDataUpload({
                     accountId: process.env.accountId,
                     apiKey: process.env.apiKey,
-                    filePath: `home/ubuntu/shortsIO-backend/uploads/${videoTitle}.mp4`,
+                    filePath: `uploads/${videoTitle}.mp4`,
                     originalFileName: `${videoTitle}.mp4`,
                 }).then(
                     response => {
@@ -129,10 +129,10 @@ exports.uploadYoutube = async (req, res) => {
 
 exports.generateSRT = async (req, res) => {
     try {
-        const fileURL = req.headers.fileurl;
-        const fileName = path.basename(fileURL);
-        console.log(fileName)
-        const data = { audio_url: fileURL };
+        const { fileurl, duration } = req.headers;
+        const fileName = path.basename(fileurl);
+        console.log(fileName);
+        const data = { audio_url: fileurl };
         const response = await axios.post(process.env.transcript_endpoint, data, { headers: headers });
         // Start polling for transcription completion
         const pollingEndpoint = `https://api.assemblyai.com/v2/transcript/${response.data.id}`;
@@ -141,38 +141,56 @@ exports.generateSRT = async (req, res) => {
         //get timeframe and subcaptions(emojis)
         // get start_time, end_time, newCaption
         console.log('here', allcaptions)
-        let start_time = 10;
-        let end_time = 40;
-        await videoAPI.videoTrim({
-            inputUrl: fileURL, startTime: start_time, endTime: end_time, outputFile: fileName
-        });
-        formDataUpload({
-            accountId: process.env.accountId,
-            apiKey: process.env.apiKey,
-            filePath: `home/ubuntu/shortsIO-backend/uploads/${fileName}`,
-            originalFileName: `${fileName}`,
-        }).then(
-            async (response) => {
-                console.log(`Success: ${JSON.stringify(response)}`);
-                const newfileURL = response['files'][0]['fileUrl'];
-                const video = new Video({
-                    originURL: fileURL,
-                    originCaption: allcaptions,
-                    modifiedURL: newfileURL,
-                    modifiedCaption: allcaptions,
-                    start_time: start_time,
-                    end_time: end_time
-                    // modifiedURL: newfileURL,
-                    // modifiedCaption: newCaption,
-                    // start_time: start_time,
-                    // end_time: end_time
-                });
-                await video.save();
-                console.log(video);
-                res.status(200).json({ message: 'success', data: video });
-            },
-            error => console.error(error)
-        );
+        let start_time = 0;
+        let end_time = 120;
+        if (duration > 120) {
+            await videoAPI.videoTrim({
+                inputUrl: fileurl, startTime: start_time, endTime: end_time, outputFile: fileName
+            });
+            formDataUpload({
+                accountId: process.env.accountId,
+                apiKey: process.env.apiKey,
+                filePath: `uploads/${fileName}`,
+                originalFileName: `${fileName}`,
+            }).then(
+                async (response) => {
+                    console.log(`Success: ${JSON.stringify(response)}`);
+                    const newfileURL = response['files'][0]['fileUrl'];
+                    const video = new Video({
+                        originURL: fileurl,
+                        originCaption: allcaptions,
+                        modifiedURL: newfileURL,
+                        modifiedCaption: allcaptions,
+                        start_time: start_time,
+                        end_time: end_time,
+                        duration: duration,
+                        // modifiedURL: newfileURL,
+                        // modifiedCaption: newCaption,
+                        // start_time: start_time,
+                        // end_time: end_time
+                    });
+                    await video.save();
+                    console.log(video);
+                    res.status(200).json({ message: 'success', data: video });
+                },
+                error => console.error(error)
+            );
+        } else {
+            const video = new Video({
+                originURL: fileurl,
+                originCaption: allcaptions,
+                modifiedURL: fileurl,
+                modifiedCaption: allcaptions,
+                duration: duration,
+                // modifiedURL: newfileURL,
+                // modifiedCaption: newCaption,
+                // start_time: start_time,
+                // end_time: end_time
+            });
+            await video.save();
+            res.status(200).json({ message: 'success', data: video });
+        }
+
     } catch (error) {
         res.status(403).send({ message: 'error' });
         console.log(error);
@@ -192,7 +210,7 @@ exports.cropVideo = async (req, res) => {
     formDataUpload({
         accountId: process.env.accountId,
         apiKey: process.env.apiKey,
-        filePath: `home/ubuntu/shortsIO-backend/uploads/output.mp4`,
+        filePath: `uploads/output.mp4`,
         originalFileName: `output.mp4`,
     }).then(
         async (response) => {

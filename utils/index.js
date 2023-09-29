@@ -54,7 +54,7 @@ exports.videoTrim = async ({ inputUrl, startTime, endTime, outputFile }) => {
         ffmpeg(inputUrl)
             .setStartTime(startTime)
             .setDuration(endTime - startTime)
-            .output(`home/ubuntu/shortsIO-backend/uploads/${outputFile}`)
+            .output(`uploads/${outputFile}`)
             .on('end', () => resolve())
             .on('error', (err) => reject(err))
             .run();
@@ -68,7 +68,7 @@ exports.videoCrop = async ({ inputUrl, width, height, x, y, outputFile }) => {
             .outputOptions(
                 '-vf', `crop=${width}:${height}:${x}:${y}`
             )
-            .output(`home/ubuntu/shortsIO-backend/uploads/${outputFile}`)
+            .output(`uploads/${outputFile}`)
             .on('end', () => resolve())
             .on('error', (err) => reject(err))
             .run();
