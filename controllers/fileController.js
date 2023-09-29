@@ -29,7 +29,7 @@ async function exportSubtitles(api_token, transcriptId, format, fileName) {
     //     formDataUpload({
     //         accountId: process.env.accountId,
     //         apiKey: process.env.apiKey,
-    //         filePath: `uploads/${fileName}.srt`,
+    //         filePath: `home/ubuntu/shortsIO-backend/uploads/${fileName}.srt`,
     //         originalFileName: `${fileName}.srt`,
     //     }).then(
     //         response => {
@@ -97,13 +97,13 @@ exports.uploadYoutube = async (req, res) => {
         // console.log('videoFormat: ', videoFormat)
         console.log('videotitle', videoTitle)
         ytdl(youtubeVideoUrl, { format: videoFormat })
-            .pipe(fs.createWriteStream(`uploads/${videoTitle}.mp4`))
+            .pipe(fs.createWriteStream(`/home/ubuntu/shortsIO-backend/uploads/${videoTitle}.mp4`))
             .on('finish', () => {
                 // res.send(`${videoTitle}.mp4`);
                 formDataUpload({
                     accountId: process.env.accountId,
                     apiKey: process.env.apiKey,
-                    filePath: `uploads/${videoTitle}.mp4`,
+                    filePath: `/home/ubuntu/shortsIO-backend/uploads/${videoTitle}.mp4`,
                     originalFileName: `${videoTitle}.mp4`,
                 }).then(
                     response => {
@@ -117,7 +117,8 @@ exports.uploadYoutube = async (req, res) => {
                 console.log('Video downloaded successfully!');
             })
             .on('error', (error) => {
-                res.status(500).send('Error downloading youtube video video:', error);
+                console.log(error)
+                res.status(500).send('Error downloading youtube video video:');
             });
 
         // ytdl(videoFormat.url).pipe(res);
@@ -150,7 +151,7 @@ exports.generateSRT = async (req, res) => {
             formDataUpload({
                 accountId: process.env.accountId,
                 apiKey: process.env.apiKey,
-                filePath: `uploads/${fileName}`,
+                filePath: `/home/ubuntu/shortsIO-backend/uploads/${fileName}`,
                 originalFileName: `${fileName}`,
             }).then(
                 async (response) => {
@@ -210,7 +211,7 @@ exports.cropVideo = async (req, res) => {
     formDataUpload({
         accountId: process.env.accountId,
         apiKey: process.env.apiKey,
-        filePath: `uploads/output.mp4`,
+        filePath: `/home/ubuntu/shortsIO-backend/uploads/output.mp4`,
         originalFileName: `output.mp4`,
     }).then(
         async (response) => {

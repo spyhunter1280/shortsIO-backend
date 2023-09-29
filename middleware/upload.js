@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 
 dotenv.config()
 const storage = multer.diskStorage({
-    destination: './uploads/',
+    destination: '/home/ubuntu/shortsIO-backend/uploads/',
     filename: function (req, file, cb) {
         cb(null, Date.now()+'--'+file.originalname);
     },
